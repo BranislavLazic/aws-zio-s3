@@ -17,8 +17,9 @@
 package com.github.branislavlazic.aws.zio.s3
 
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
 
-import scalaz.zio.{ IO, Task }
+import scalaz.zio.{ IO, Task, ZIO }
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.model.{
   CreateBucketRequest,
@@ -35,61 +36,55 @@ object S3 {
     * Create S3 bucket with the given name.
     *
     * @param s3AsyncClient - the client for async access to S3
-    * @param name - the name of the bucket
+    * @param name          - the name of the bucket
     */
   def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
     IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
-      s3AsyncClient
-        .createBucket(CreateBucketRequest.builder().bucket(name).build())
-        .handle[CreateBucketResponse]((response, err) => {
-          err match {
-            case null => callback(IO.apply(response))
-            case ex   => callback(IO.fail(ex))
-          }
-          response
-        })
+      handleResponse(s3AsyncClient
+                       .createBucket(CreateBucketRequest.builder().bucket(name).build()),
+                     callback)
     }
 
   /**
     * Delete the bucket with the given name.
     *
     * @param s3AsyncClient - the client for async access to S3
-    * @param name - the name of the bucket
+    * @param name          - the name of the bucket
     */
   def deleteBucket(s3AsyncClient: S3AsyncClient, name: String): Task[DeleteBucketResponse] =
     IO.effectAsync[Throwable, DeleteBucketResponse] { callback =>
-      s3AsyncClient
-        .deleteBucket(DeleteBucketRequest.builder().bucket(name).build())
-        .handle[DeleteBucketResponse]((response, err) => {
-          err match {
-            case null => callback(IO.apply(response))
-            case ex   => callback(IO.fail(ex))
-          }
-          response
-        })
+      handleResponse(s3AsyncClient
+                       .deleteBucket(DeleteBucketRequest.builder().bucket(name).build()),
+                     callback)
     }
 
   /**
     * Upload an object with a given key on S3 bucket.
     *
     * @param s3AsyncClient - the client for async access to S3
-    * @param bucketName - the name of the bucket
-    * @param keyName - object key
-    * @param filePath - file path
+    * @param bucketName    - the name of the bucket
+    * @param keyName       - object key
+    * @param filePath      - file path
     */
   def putObject(s3AsyncClient: S3AsyncClient,
                 bucketName: String,
                 keyName: String,
                 filePath: Path): Task[PutObjectResponse] =
     IO.effectAsync[Throwable, PutObjectResponse] { callback =>
-      s3AsyncClient
-        .putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName).build(), filePath)
-        .handle[PutObjectResponse]((response, err) => {
-          err match {
-            case null => callback(IO.apply(response))
-            case ex   => callback(IO.fail(ex))
-          }
-          response
-        })
+      handleResponse(
+        s3AsyncClient
+          .putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName).build(), filePath),
+        callback
+      )
     }
+
+  private def handleResponse[T](completableFuture: CompletableFuture[T],
+                                callback: ZIO[Any, Throwable, T] => Unit) =
+    completableFuture.handle[T]((response, err) => {
+      err match {
+        case null => callback(IO.apply(response))
+        case ex   => callback(IO.fail(ex))
+      }
+      response
+    })
 }
