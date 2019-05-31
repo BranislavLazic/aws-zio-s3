@@ -20,6 +20,8 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
 import scalaz.zio.{ IO, Task, ZIO }
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.model.{
   CreateBucketRequest,
@@ -32,6 +34,22 @@ import software.amazon.awssdk.services.s3.model.{
 }
 
 object S3 {
+
+  /**
+    * Create an async S3 client.
+    *
+    * @param region                 - The AWS region
+    * @param awsCredentialsProvider - credentials loader
+    */
+  def createClient(region: Region,
+                   awsCredentialsProvider: AwsCredentialsProvider): Task[S3AsyncClient] =
+    Task {
+      S3AsyncClient
+        .builder()
+        .region(region)
+        .credentialsProvider(awsCredentialsProvider)
+        .build()
+    }
 
   /**
     * Create S3 bucket with the given name.
@@ -91,11 +109,10 @@ object S3 {
 
   private def handleResponse[T](completableFuture: CompletableFuture[T],
                                 callback: ZIO[Any, Throwable, T] => Unit) =
-    completableFuture.handle[T]((response, err) => {
+    completableFuture.handle[Unit]((response, err) => {
       err match {
-        case null => callback(IO.apply(response))
+        case null => callback(IO.succeed(response))
         case ex   => callback(IO.fail(ex))
       }
-      response
     })
 }

@@ -19,13 +19,13 @@ import scala.collection.JavaConverters._
 object Main extends App {
   override def run(args: List[String]): ZIO[Main.Environment, Nothing, Int] = (
     for {
-      client <- Task {
-        S3AsyncClient.builder()
-          .region(Region.EU_WEST_1)
-          .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("api-key", "secret-key")))
-          .build()
-
-      }
+      client <- S3.createClient(
+        Region.EU_WEST_1,
+        StaticCredentialsProvider.create(
+          AwsBasicCredentials.create("api-key",
+                                     "secret-key")
+        )
+      )
       // Create the bucket
       _    <- S3.createBucket(client, "s3-bucket-name")
       // Upload the file
