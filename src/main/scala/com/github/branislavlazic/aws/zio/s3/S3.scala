@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.s3.model.{
   CreateBucketResponse,
   DeleteBucketRequest,
   DeleteBucketResponse,
+  ListBucketsResponse,
   PutObjectRequest,
   PutObjectResponse
 }
@@ -76,6 +77,16 @@ object S3 {
           .putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName).build(), filePath),
         callback
       )
+    }
+
+  /**
+    * Obtain a list of all buckets owned by the authenticated sender.
+    *
+    * @param s3AsyncClient - the client for async access to S3
+    */
+  def listBuckets(s3AsyncClient: S3AsyncClient): Task[ListBucketsResponse] =
+    IO.effectAsync[Throwable, ListBucketsResponse] { callback =>
+      handleResponse(s3AsyncClient.listBuckets(), callback)
     }
 
   private def handleResponse[T](completableFuture: CompletableFuture[T],
