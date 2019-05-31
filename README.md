@@ -4,7 +4,7 @@ Welcome to aws-zio-s3!
 
 ZIO based client for AWS S3.
 
-#### Create bucket
+### How to use
 
 ```scala
 package com.github.branislavlazic.aws.zio.s3
