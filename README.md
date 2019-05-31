@@ -9,6 +9,7 @@ ZIO based client for AWS S3.
 ```scala
 package com.github.branislavlazic.aws.zio.s3
 import scalaz.zio._
+import java.nio.file.Paths
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3AsyncClient
@@ -23,7 +24,12 @@ object Main extends App {
           .build()
 
       }
+      // Create the bucket
       _ <- S3.createBucket(client, "s3-bucket-name")
+      // Upload the file
+      _ <- S3.putObject(client, "s3-bucket-name", Paths.get("/tmp/file.txt").getFileName.toString, Paths.get("/tmp/file.txt"))
+      // Delete the bucket
+      _ <- S3.deleteBucket(client, "s3-bucket-name")
     } yield 0).foldM(e => UIO(println(e.toString)).const(1), IO.succeed)
 }
 
