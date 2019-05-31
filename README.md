@@ -2,6 +2,33 @@
 
 Welcome to aws-zio-s3!
 
+ZIO based client for AWS S3.
+
+#### Create bucket
+
+```scala
+package com.github.branislavlazic.aws.zio.s3
+import scalaz.zio._
+import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3AsyncClient
+
+object Main extends App {
+  override def run(args: List[String]): ZIO[Main.Environment, Nothing, Int] = (
+    for {
+      client <- Task {
+        S3AsyncClient.builder()
+          .region(Region.EU_WEST_1)
+          .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("api-key", "secret-key")))
+          .build()
+
+      }
+      _ <- S3.createBucket(client, "s3-bucket-name")
+    } yield 0).foldM(e => UIO(println(e.toString)).const(1), IO.succeed)
+}
+
+```
+
 ## Contribution policy ##
 
 Contributions via GitHub pull requests are gladly accepted from their original author. Along with

@@ -22,6 +22,11 @@ import software.amazon.awssdk.services.s3.model.{ CreateBucketRequest, CreateBuc
 
 object S3 {
 
+  /**
+    * Create S3 bucket with the given name.
+    * @param s3AsyncClient - the client for async access to S3
+    * @param name - the name of the bucket
+    */
   def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
     IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
       s3AsyncClient
