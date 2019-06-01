@@ -58,7 +58,7 @@ object S3 {
     * @param name          - the name of the bucket
     */
   def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
-    IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
+    IO.effectAsync[Any, Throwable, CreateBucketResponse] { callback =>
       handleResponse(s3AsyncClient
                        .createBucket(CreateBucketRequest.builder().bucket(name).build()),
                      callback)
@@ -71,7 +71,7 @@ object S3 {
     * @param name          - the name of the bucket
     */
   def deleteBucket(s3AsyncClient: S3AsyncClient, name: String): Task[DeleteBucketResponse] =
-    IO.effectAsync[Throwable, DeleteBucketResponse] { callback =>
+    IO.effectAsync[Any, Throwable, DeleteBucketResponse] { callback =>
       handleResponse(s3AsyncClient
                        .deleteBucket(DeleteBucketRequest.builder().bucket(name).build()),
                      callback)
@@ -89,7 +89,7 @@ object S3 {
                 bucketName: String,
                 keyName: String,
                 filePath: Path): Task[PutObjectResponse] =
-    IO.effectAsync[Throwable, PutObjectResponse] { callback =>
+    IO.effectAsync[Any, Throwable, PutObjectResponse] { callback =>
       handleResponse(
         s3AsyncClient
           .putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName).build(), filePath),
@@ -103,7 +103,7 @@ object S3 {
     * @param s3AsyncClient - the client for async access to S3
     */
   def listBuckets(s3AsyncClient: S3AsyncClient): Task[ListBucketsResponse] =
-    IO.effectAsync[Throwable, ListBucketsResponse] { callback =>
+    IO.effectAsync[Any, Throwable, ListBucketsResponse] { callback =>
       handleResponse(s3AsyncClient.listBuckets(), callback)
     }
 
