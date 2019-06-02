@@ -24,7 +24,7 @@ lazy val library =
   new {
     object Version {
       val awsS3      = "2.5.29" 
-      val scalazZio  = "1.0-RC4"
+      val scalazZio  = "1.0-RC5"
       val scalaCheck = "1.14.0"
       val scalaTest  = "3.0.6"
     }
