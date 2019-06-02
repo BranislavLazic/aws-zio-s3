@@ -30,6 +30,8 @@ object Main extends App {
       _    <- S3.createBucket(client, "s3-bucket-name")
       // Upload the file
       _    <- S3.putObject(client, "s3-bucket-name", Paths.get("/tmp/file.txt").getFileName.toString, Paths.get("/tmp/file.txt"))
+      // Delete the file
+      _    <- S3.deleteObject(client, "s3-bucket-name", "file.txt")
       // Delete the bucket
       _    <- S3.deleteBucket(client, "s3-bucket-name")
       // List all buckets

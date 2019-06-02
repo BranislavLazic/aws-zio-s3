@@ -28,6 +28,8 @@ import software.amazon.awssdk.services.s3.model.{
   CreateBucketResponse,
   DeleteBucketRequest,
   DeleteBucketResponse,
+  DeleteObjectRequest,
+  DeleteObjectResponse,
   ListBucketsResponse,
   PutObjectRequest,
   PutObjectResponse
@@ -82,17 +84,36 @@ object S3 {
     *
     * @param s3AsyncClient - the client for async access to S3
     * @param bucketName    - the name of the bucket
-    * @param keyName       - object key
+    * @param key           - object key
     * @param filePath      - file path
     */
   def putObject(s3AsyncClient: S3AsyncClient,
                 bucketName: String,
-                keyName: String,
+                key: String,
                 filePath: Path): Task[PutObjectResponse] =
     IO.effectAsync[Throwable, PutObjectResponse] { callback =>
       handleResponse(
         s3AsyncClient
-          .putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName).build(), filePath),
+          .putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(), filePath),
+        callback
+      )
+    }
+
+  /**
+    * Delete an object with a given key on S3 bucket.
+    *
+    * @param s3AsyncClient - the client for async access to S3
+    * @param bucketName    - the name of the bucket
+    * @param key           - object key
+    */
+  def deleteObject(s3AsyncClient: S3AsyncClient,
+                   bucketName: String,
+                   key: String): Task[DeleteObjectResponse] =
+    IO.effectAsync[Throwable, DeleteObjectResponse] { callback =>
+      handleResponse(
+        s3AsyncClient.deleteObject(
+          DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
+        ),
         callback
       )
     }
