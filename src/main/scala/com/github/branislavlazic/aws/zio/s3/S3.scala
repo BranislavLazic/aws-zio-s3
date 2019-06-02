@@ -109,7 +109,7 @@ object S3 {
   def deleteObject(s3AsyncClient: S3AsyncClient,
                    bucketName: String,
                    key: String): Task[DeleteObjectResponse] =
-    IO.effectAsync[Throwable, DeleteObjectResponse] { callback =>
+    IO.effectAsync[Any, Throwable, DeleteObjectResponse] { callback =>
       handleResponse(
         s3AsyncClient.deleteObject(
           DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
