@@ -1,3 +1,5 @@
+
+
 // *****************************************************************************
 // Projects
 // *****************************************************************************
@@ -10,7 +12,7 @@ lazy val `aws-zio-s3` =
     .settings(
       libraryDependencies ++= Seq(
         library.awsS3Async,
-        library.scalazZio,
+        library.zio,
         library.scalaCheck % Test,
         library.scalaTest  % Test,
       )
@@ -24,12 +26,12 @@ lazy val library =
   new {
     object Version {
       val awsS3      = "2.5.29" 
-      val scalazZio  = "1.0-RC5"
+      val zio        = "1.0.0-RC15"
       val scalaCheck = "1.14.0"
-      val scalaTest  = "3.0.6"
+      val scalaTest  = "3.0.8"
     }
     val awsS3Async = "software.amazon.awssdk" %  "s3"         % Version.awsS3
-    val scalazZio  = "org.scalaz"             %% "scalaz-zio" % Version.scalazZio
+    val zio        = "dev.zio"                %% "zio"        % Version.zio
     val scalaCheck = "org.scalacheck"         %% "scalacheck" % Version.scalaCheck
     val scalaTest  = "org.scalatest"          %% "scalatest"  % Version.scalaTest
   }
@@ -56,12 +58,9 @@ lazy val commonSettings =
       "-language:_",
       "-target:jvm-1.8",
       "-encoding", "UTF-8",
-      "-Ypartial-unification",
-      "-Ywarn-unused-import",
     ),
     Compile / unmanagedSourceDirectories := Seq((Compile / scalaSource).value),
     Test / unmanagedSourceDirectories := Seq((Test / scalaSource).value),
-    Compile / compile / wartremoverWarnings ++= Warts.unsafe,
 )
 
 lazy val scalafmtSettings =

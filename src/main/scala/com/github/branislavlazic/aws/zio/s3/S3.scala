@@ -19,7 +19,7 @@ package com.github.branislavlazic.aws.zio.s3
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
-import scalaz.zio.{ IO, Task, ZIO }
+import zio.{ IO, Task, ZIO }
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3AsyncClient
@@ -43,8 +43,10 @@ object S3 {
     * @param region                 - The AWS region
     * @param awsCredentialsProvider - credentials loader
     */
-  def createClient(region: Region,
-                   awsCredentialsProvider: AwsCredentialsProvider): Task[S3AsyncClient] =
+  def createClient(
+      region: Region,
+      awsCredentialsProvider: AwsCredentialsProvider
+  ): Task[S3AsyncClient] =
     Task {
       S3AsyncClient
         .builder()
@@ -60,10 +62,12 @@ object S3 {
     * @param name          - the name of the bucket
     */
   def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
-    IO.effectAsync[Any, Throwable, CreateBucketResponse] { callback =>
-      handleResponse(s3AsyncClient
-                       .createBucket(CreateBucketRequest.builder().bucket(name).build()),
-                     callback)
+    IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
+      handleResponse(
+        s3AsyncClient
+          .createBucket(CreateBucketRequest.builder().bucket(name).build()),
+        callback
+      )
     }
 
   /**
@@ -73,10 +77,12 @@ object S3 {
     * @param name          - the name of the bucket
     */
   def deleteBucket(s3AsyncClient: S3AsyncClient, name: String): Task[DeleteBucketResponse] =
-    IO.effectAsync[Any, Throwable, DeleteBucketResponse] { callback =>
-      handleResponse(s3AsyncClient
-                       .deleteBucket(DeleteBucketRequest.builder().bucket(name).build()),
-                     callback)
+    IO.effectAsync[Throwable, DeleteBucketResponse] { callback =>
+      handleResponse(
+        s3AsyncClient
+          .deleteBucket(DeleteBucketRequest.builder().bucket(name).build()),
+        callback
+      )
     }
 
   /**
@@ -87,11 +93,13 @@ object S3 {
     * @param key           - object key
     * @param filePath      - file path
     */
-  def putObject(s3AsyncClient: S3AsyncClient,
-                bucketName: String,
-                key: String,
-                filePath: Path): Task[PutObjectResponse] =
-    IO.effectAsync[Any, Throwable, PutObjectResponse] { callback =>
+  def putObject(
+      s3AsyncClient: S3AsyncClient,
+      bucketName: String,
+      key: String,
+      filePath: Path
+  ): Task[PutObjectResponse] =
+    IO.effectAsync[Throwable, PutObjectResponse] { callback =>
       handleResponse(
         s3AsyncClient
           .putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(), filePath),
@@ -106,10 +114,12 @@ object S3 {
     * @param bucketName    - the name of the bucket
     * @param key           - object key
     */
-  def deleteObject(s3AsyncClient: S3AsyncClient,
-                   bucketName: String,
-                   key: String): Task[DeleteObjectResponse] =
-    IO.effectAsync[Any, Throwable, DeleteObjectResponse] { callback =>
+  def deleteObject(
+      s3AsyncClient: S3AsyncClient,
+      bucketName: String,
+      key: String
+  ): Task[DeleteObjectResponse] =
+    IO.effectAsync[Throwable, DeleteObjectResponse] { callback =>
       handleResponse(
         s3AsyncClient.deleteObject(
           DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
@@ -124,12 +134,14 @@ object S3 {
     * @param s3AsyncClient - the client for async access to S3
     */
   def listBuckets(s3AsyncClient: S3AsyncClient): Task[ListBucketsResponse] =
-    IO.effectAsync[Any, Throwable, ListBucketsResponse] { callback =>
+    IO.effectAsync[Throwable, ListBucketsResponse] { callback =>
       handleResponse(s3AsyncClient.listBuckets(), callback)
     }
 
-  private def handleResponse[T](completableFuture: CompletableFuture[T],
-                                callback: ZIO[Any, Throwable, T] => Unit) =
+  private def handleResponse[T](
+      completableFuture: CompletableFuture[T],
+      callback: ZIO[Any, Throwable, T] => Unit
+  ) =
     completableFuture.handle[Unit]((response, err) => {
       err match {
         case null => callback(IO.succeed(response))
