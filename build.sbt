@@ -42,10 +42,12 @@ lazy val library =
 
 lazy val settings =
   commonSettings ++
-  scalafmtSettings
+  scalafmtSettings ++
+  sonatypeSettings
 
 lazy val commonSettings =
   Seq(
+    version  := "0.1.0",
     // scalaVersion from .travis.yml via sbt-travisci
     // scalaVersion := "2.12.8",
     organization := "com.github.branislavlazic",
@@ -66,4 +68,26 @@ lazy val commonSettings =
 lazy val scalafmtSettings =
   Seq(
     scalafmtOnCompile := true,
+  )
+
+lazy val sonatypeSettings =
+  Seq(
+    sonatypeProfileName := "com.github.branislavlazic",
+    scmInfo := Some(
+      ScmInfo(
+        url("https://github.com/BranislavLazic/aws-zio-s3"),
+        "scm:git@github.com:BranislavLazic/aws-zio-s3.git"
+      )
+    ),
+    developers := List(
+      Developer(
+        id    = "BranislavLazic",
+        name  = "Branislav Lazic",
+        email = "brano2411@hotmail.com",
+        url   = url("http://github.com/BranislavLazic")
+      )
+    ),
+    description := "ZIO wrapper for AWS S3 SDK async client.",
+    pomIncludeRepository := { _ => false },
+    publishTo := sonatypePublishToBundle.value,
   )
