@@ -42,6 +42,10 @@ object Main extends App {
 
 ```
 
+Add SBT dependency:
+
+`"com.github.branislavlazic" %% "aws-zio-s3" % "0.1.0"`
+
 ## Contribution policy ##
 
 Contributions via GitHub pull requests are gladly accepted from their original author. Along with
