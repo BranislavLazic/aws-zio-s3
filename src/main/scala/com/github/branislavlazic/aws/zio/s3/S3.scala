@@ -38,14 +38,14 @@ import software.amazon.awssdk.services.s3.model.{
 object S3 {
 
   /**
-    * Create an async S3 client.
-    *
-    * @param region                 - The AWS region
-    * @param awsCredentialsProvider - credentials loader
-    */
+   * Create an async S3 client.
+   *
+   * @param region                 - The AWS region
+   * @param awsCredentialsProvider - credentials loader
+   */
   def createClient(
-      region: Region,
-      awsCredentialsProvider: AwsCredentialsProvider
+    region: Region,
+    awsCredentialsProvider: AwsCredentialsProvider
   ): Task[S3AsyncClient] =
     Task {
       S3AsyncClient
@@ -56,11 +56,11 @@ object S3 {
     }
 
   /**
-    * Create S3 bucket with the given name.
-    *
-    * @param s3AsyncClient - the client for async access to S3
-    * @param name          - the name of the bucket
-    */
+   * Create S3 bucket with the given name.
+   *
+   * @param s3AsyncClient - the client for async access to S3
+   * @param name          - the name of the bucket
+   */
   def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
     IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
       handleResponse(
@@ -71,11 +71,11 @@ object S3 {
     }
 
   /**
-    * Delete the bucket with the given name.
-    *
-    * @param s3AsyncClient - the client for async access to S3
-    * @param name          - the name of the bucket
-    */
+   * Delete the bucket with the given name.
+   *
+   * @param s3AsyncClient - the client for async access to S3
+   * @param name          - the name of the bucket
+   */
   def deleteBucket(s3AsyncClient: S3AsyncClient, name: String): Task[DeleteBucketResponse] =
     IO.effectAsync[Throwable, DeleteBucketResponse] { callback =>
       handleResponse(
@@ -86,18 +86,18 @@ object S3 {
     }
 
   /**
-    * Upload an object with a given key on S3 bucket.
-    *
-    * @param s3AsyncClient - the client for async access to S3
-    * @param bucketName    - the name of the bucket
-    * @param key           - object key
-    * @param filePath      - file path
-    */
+   * Upload an object with a given key on S3 bucket.
+   *
+   * @param s3AsyncClient - the client for async access to S3
+   * @param bucketName    - the name of the bucket
+   * @param key           - object key
+   * @param filePath      - file path
+   */
   def putObject(
-      s3AsyncClient: S3AsyncClient,
-      bucketName: String,
-      key: String,
-      filePath: Path
+    s3AsyncClient: S3AsyncClient,
+    bucketName: String,
+    key: String,
+    filePath: Path
   ): Task[PutObjectResponse] =
     IO.effectAsync[Throwable, PutObjectResponse] { callback =>
       handleResponse(
@@ -108,16 +108,16 @@ object S3 {
     }
 
   /**
-    * Delete an object with a given key on S3 bucket.
-    *
-    * @param s3AsyncClient - the client for async access to S3
-    * @param bucketName    - the name of the bucket
-    * @param key           - object key
-    */
+   * Delete an object with a given key on S3 bucket.
+   *
+   * @param s3AsyncClient - the client for async access to S3
+   * @param bucketName    - the name of the bucket
+   * @param key           - object key
+   */
   def deleteObject(
-      s3AsyncClient: S3AsyncClient,
-      bucketName: String,
-      key: String
+    s3AsyncClient: S3AsyncClient,
+    bucketName: String,
+    key: String
   ): Task[DeleteObjectResponse] =
     IO.effectAsync[Throwable, DeleteObjectResponse] { callback =>
       handleResponse(
@@ -129,18 +129,18 @@ object S3 {
     }
 
   /**
-    * Obtain a list of all buckets owned by the authenticated sender.
-    *
-    * @param s3AsyncClient - the client for async access to S3
-    */
+   * Obtain a list of all buckets owned by the authenticated sender.
+   *
+   * @param s3AsyncClient - the client for async access to S3
+   */
   def listBuckets(s3AsyncClient: S3AsyncClient): Task[ListBucketsResponse] =
     IO.effectAsync[Throwable, ListBucketsResponse] { callback =>
       handleResponse(s3AsyncClient.listBuckets(), callback)
     }
 
   private def handleResponse[T](
-      completableFuture: CompletableFuture[T],
-      callback: ZIO[Any, Throwable, T] => Unit
+    completableFuture: CompletableFuture[T],
+    callback: ZIO[Any, Throwable, T] => Unit
   ) =
     completableFuture.handle[Unit]((response, err) => {
       err match {
