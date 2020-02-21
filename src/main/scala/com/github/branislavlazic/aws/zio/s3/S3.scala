@@ -35,18 +35,9 @@ import software.amazon.awssdk.services.s3.model.{
   PutObjectResponse
 }
 
-object S3 {
+class S3(region: Region, awsCredentialsProvider: AwsCredentialsProvider) {
 
-  /**
-   * Create an async S3 client.
-   *
-   * @param region                 - The AWS region
-   * @param awsCredentialsProvider - credentials loader
-   */
-  def createClient(
-    region: Region,
-    awsCredentialsProvider: AwsCredentialsProvider
-  ): Task[S3AsyncClient] =
+  val s3AsyncClient: Task[S3AsyncClient] =
     Task {
       S3AsyncClient
         .builder()
@@ -57,95 +48,59 @@ object S3 {
 
   /**
    * Create S3 bucket with the given name.
-   *
-   * @param s3AsyncClient - the client for async access to S3
-   * @param name          - the name of the bucket
+   * @param name - the name of the bucket
    */
-  def createBucket(s3AsyncClient: S3AsyncClient, name: String): Task[CreateBucketResponse] =
-    IO.effectAsync[Throwable, CreateBucketResponse] { callback =>
-      handleResponse(
-        s3AsyncClient
-          .createBucket(CreateBucketRequest.builder().bucket(name).build()),
-        callback
-      )
-    }
+  def createBucket(name: String): Task[CreateBucketResponse] =
+    handleS3EffectAsync(_.createBucket(CreateBucketRequest.builder().bucket(name).build()))
 
   /**
    * Delete the bucket with the given name.
    *
-   * @param s3AsyncClient - the client for async access to S3
-   * @param name          - the name of the bucket
+   * @param name - the name of the bucket
    */
-  def deleteBucket(s3AsyncClient: S3AsyncClient, name: String): Task[DeleteBucketResponse] =
-    IO.effectAsync[Throwable, DeleteBucketResponse] { callback =>
-      handleResponse(
-        s3AsyncClient
-          .deleteBucket(DeleteBucketRequest.builder().bucket(name).build()),
-        callback
-      )
-    }
+  def deleteBucket(name: String): Task[DeleteBucketResponse] =
+    handleS3EffectAsync(_.deleteBucket(DeleteBucketRequest.builder().bucket(name).build()))
 
   /**
    * Upload an object with a given key on S3 bucket.
    *
-   * @param s3AsyncClient - the client for async access to S3
-   * @param bucketName    - the name of the bucket
-   * @param key           - object key
-   * @param filePath      - file path
+   * @param bucketName - the name of the bucket
+   * @param key        - object key
+   * @param filePath   - file path
    */
   def putObject(
-    s3AsyncClient: S3AsyncClient,
     bucketName: String,
     key: String,
     filePath: Path
   ): Task[PutObjectResponse] =
-    IO.effectAsync[Throwable, PutObjectResponse] { callback =>
-      handleResponse(
-        s3AsyncClient
-          .putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(), filePath),
-        callback
-      )
-    }
+    handleS3EffectAsync(_.putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(), filePath))
 
   /**
    * Delete an object with a given key on S3 bucket.
    *
-   * @param s3AsyncClient - the client for async access to S3
-   * @param bucketName    - the name of the bucket
-   * @param key           - object key
+   * @param bucketName - the name of the bucket
+   * @param key        - object key
    */
   def deleteObject(
-    s3AsyncClient: S3AsyncClient,
     bucketName: String,
     key: String
   ): Task[DeleteObjectResponse] =
-    IO.effectAsync[Throwable, DeleteObjectResponse] { callback =>
-      handleResponse(
-        s3AsyncClient.deleteObject(
-          DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
-        ),
-        callback
-      )
-    }
+    handleS3EffectAsync(_.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key(key).build()))
 
   /**
    * Obtain a list of all buckets owned by the authenticated sender.
-   *
-   * @param s3AsyncClient - the client for async access to S3
    */
-  def listBuckets(s3AsyncClient: S3AsyncClient): Task[ListBucketsResponse] =
-    IO.effectAsync[Throwable, ListBucketsResponse] { callback =>
-      handleResponse(s3AsyncClient.listBuckets(), callback)
-    }
+  def listBuckets(): Task[ListBucketsResponse] = handleS3EffectAsync(_.listBuckets())
 
-  private def handleResponse[T](
-    completableFuture: CompletableFuture[T],
-    callback: ZIO[Any, Throwable, T] => Unit
-  ) =
-    completableFuture.handle[Unit]((response, err) => {
-      err match {
-        case null => callback(IO.succeed(response))
-        case ex   => callback(IO.fail(ex))
+  private def handleS3EffectAsync[T](toS3Response: S3AsyncClient => CompletableFuture[T]): ZIO[Any, Throwable, T] =
+    s3AsyncClient.flatMap { client =>
+      IO.effectAsync[Throwable, T] { callback =>
+        toS3Response(client).handle[Unit]((response, err) => {
+          err match {
+            case null => callback(IO.succeed(response))
+            case ex   => callback(IO.fail(ex))
+          }
+        })
       }
-    })
+    }
 }

@@ -70,7 +70,7 @@ lazy val scalafmtSettings =
 
 lazy val sonatypeSettings =
   Seq(
-    version := "0.2.0",
+    version := "0.3.0",
     sonatypeProfileName := "com.github.branislavlazic",
     scmInfo := Some(
       ScmInfo(
