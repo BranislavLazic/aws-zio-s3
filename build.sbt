@@ -23,7 +23,7 @@ lazy val `aws-zio-s3` =
 lazy val library =
   new {
     object Version {
-      val awsS3      = "2.10.35"
+      val awsS3      = "2.10.69"
       val zio        = "1.0.0-RC17"
       val scalaCheck = "1.14.0"
       val scalaTest  = "3.0.8"
@@ -45,8 +45,8 @@ lazy val settings =
 
 lazy val commonSettings =
   Seq(
-    // scalaVersion from .travis.yml via sbt-travisci
-    // scalaVersion := "2.12.8",
+    scalaVersion := "2.12.10",
+    crossScalaVersions := Seq("2.12.10", "2.13.1"),
     organization := "com.github.branislavlazic",
     organizationName := "Branislav Lazic",
     startYear := Some(2019),
@@ -96,4 +96,5 @@ lazy val sonatypeSettings =
 
 addCommandAlias("rel", "reload")
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
-addCommandAlias("fix", "all compile:scalafix test:scalafix")
+addCommandAlias("c", "compile")
+addCommandAlias("t", "test")
