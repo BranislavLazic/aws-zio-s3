@@ -8,8 +8,8 @@ ZIO based client for AWS S3.
 
 ```scala
 package com.github.branislavlazic.aws.zio.s3
-import scalaz.zio._
-import scalaz.zio.console._
+import zio._
+import zio.console._
 import java.nio.file.Paths
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.regions.Region
@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClient
 import scala.collection.JavaConverters._
 
 object Main extends App {
-  override def run(args: List[String]): ZIO[Main.Environment, Nothing, Int] = (
+  override def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = (
     for {
       client <- S3.createClient(
         Region.EU_WEST_1,
@@ -44,7 +44,7 @@ object Main extends App {
 
 Add SBT dependency:
 
-`libraryDependencies += "com.github.branislavlazic" % "aws-zio-s3_2.13" % "0.1.0"`
+`libraryDependencies += "com.github.branislavlazic" %% "aws-zio-s3" % "0.2.0"`
 
 ## Contribution policy ##
 
